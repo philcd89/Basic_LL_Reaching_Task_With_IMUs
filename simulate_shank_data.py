@@ -31,9 +31,9 @@ demoData = pd.read_table("demo.txt", sep = ",")
 #%%
 
 def shiftnadd(list_to_shift, val_to_add):
-    list_to_shift[0:-1] = list_to_shift[1:] # shift samples left 1 spot, dropping first sample
-    list_to_shift[-1] = val_to_add # append new sample to end of window  
-    return(list_to_shift)
+    newlist = list_to_shift[1:] # drop first sample
+    newlist = np.append(newlist, val_to_add) # append new sample to end of window  
+    return(newlist)
 
 try:
     plotWindow = 3 #seconds: sampling rate of sensors is 100 Hz
