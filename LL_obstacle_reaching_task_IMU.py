@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Jan 26 14:01:07 2021
-
 @author: philc
-
-This code is a first attempt at piping MotionNode data from the path into a txt file, while also graphically representing data.
+This code is a first attempt at piping MotionNode data from the path into a txt file, while also driving the task
 """
 
 #%% Setup
@@ -12,7 +10,7 @@ This code is a first attempt at piping MotionNode data from the path into a txt 
 import argparse
 import sys
 import pygame
-import math
+import math as m
 import numpy as np
 
 from win32api import GetSystemMetrics as SysMet
@@ -55,16 +53,21 @@ CursRad = 12
 ObstY = round(height*0.75) - 300
 ObstLength = 10
 ObstWidth = 150
+CounterX = 20
+CounterY = 20
 
 pygame.init()
 pygame.display.set_caption("Basic Reaching Task")
 # icon = pygame.image.load("imagename.png")
 # pygame.display.set_icon(icon)
+clock = pygame.time.Clock()
+
+font = pygame.font.SysFont("Arial", 28)
 
 #%% Define object parameters
 
 def Blank_Screen(color):
-    screen.fill(color)
+    screen.fill(color)  
     
 def Instructions(x = centerX, y = centerY):
     
@@ -101,6 +104,12 @@ def Obstacle(color = red, Length = ObstLength, Width = ObstWidth, x = centerX, y
     rect_length = Length
     RectParams = (rect_left, rect_top, rect_width, rect_length)
     pygame.draw.rect(screen, color, rect = RectParams)  
+    
+def Obst_Counter(x, y, font, obstacles_hit):
+    
+    text = font.render("Obstacles Hit: " + str(obstacles_hit), True, white)
+    screen.blit(text, (x, y))
+    
 
 #%% INSTRUCTIONS
 run = True
@@ -203,6 +212,7 @@ def stream_data_to_csv(args, out):
     wait_in_targ = 2000
     show_obst_pre_move = 1000
     curs_in_home_time = 0
+    curs_in_obst_time = 0
     
     # Initial States
     curs_in_home = False
@@ -217,6 +227,15 @@ def stream_data_to_csv(args, out):
     show_obstacle = False
     cue_on = False
     trial_cond = 0
+    curs_in_obst = False
+    curs_in_obst_prev = False
+    obst_hit_counter = 0
+    fill_color = black
+    
+    curs_in_obst_xmin = centerX - (ObstWidth/2) - CursRad   
+    curs_in_obst_xmax = centerX + (ObstWidth/2) + CursRad
+    curs_in_obst_ymin = ObstY - CursRad                     # This is all weird because the rect is placed based on the top right
+    curs_in_obst_ymax = ObstY + ObstLength + CursRad
     
     while True:
         
@@ -291,10 +310,28 @@ def stream_data_to_csv(args, out):
 
         # ###################### PYGAME CODE ######################
         
+        
         # Get some constants for this loop
         pygame.mouse.set_visible(False)
-        screen.fill(black)
+        screen.fill(fill_color)
         current_time = pygame.time.get_ticks()
+        
+        
+        
+        
+        
+        # ---------- SET PRIORS ----------
+        
+        # Set prior states
+        curs_in_home_prev = curs_in_home
+        curs_in_targ_prev = curs_in_targ
+        targ_hit_prev = targ_hit
+        move_back_prev = move_back
+        curs_in_obst_prev = curs_in_obst
+            
+        
+        
+        
         
         # ------------ CURSOR CONTROL ----------------
 
@@ -311,8 +348,12 @@ def stream_data_to_csv(args, out):
             CursY -= flat_list[19]*yGain
         
         # Determine distances
-        dist_to_home = math.sqrt((abs(CursX-HomeX)**2) + (abs(CursY-HomeY)**2))
-        dist_to_targ = math.sqrt((abs(CursX-TargX)**2) + (abs(CursY-TargY)**2))
+        dist_to_home = m.sqrt((abs(CursX-HomeX)**2) + (abs(CursY-HomeY)**2))
+        dist_to_targ = m.sqrt((abs(CursX-TargX)**2) + (abs(CursY-TargY)**2))
+        
+        
+        
+        
         
         # --------- IS THE CURSOR IN THE TARGET(S)? ---------
         if dist_to_home < (CursRad + HomeRad):
@@ -324,6 +365,10 @@ def stream_data_to_csv(args, out):
             curs_in_targ = True
         else:
             curs_in_targ = False
+            
+            
+            
+            
             
         # --------- LOOK FOR STATE CHANGES, GET TIME, AND CREATE EVENT ---------
         if curs_in_home and not curs_in_home_prev:
@@ -380,20 +425,15 @@ def stream_data_to_csv(args, out):
         
         if not move_back and move_back_prev: #if move_back switches from true to false, signalling the end of the trial, advance the trial number
             trial += 1
+            curs_in_obst = False
             
         # ---------- SET TRIAL CONDITION -----------
         
         trial_cond = trial_conditions[trial-1]
         
-        # ---------- SET PRIORS ----------
         
-        # Set prior states
-        curs_in_home_prev = curs_in_home
-        curs_in_targ_prev = curs_in_targ
-        targ_hit_prev = targ_hit
-        move_back_prev = move_back    
         
-         # ---------- MANAGE OBSTACLE PRESENTATION ----------
+        # ---------- MANAGE OBSTACLE PRESENTATION ----------
         
         # No obstacle
         if trial_cond == 0:
@@ -426,7 +466,28 @@ def stream_data_to_csv(args, out):
                 show_obstacle = True
             elif targ_hit and (current_time - curs_in_targ_time > wait_in_targ):
                 show_obstacle = False    
+                
+                
+                
+        # --------- MANAGE OBSTACLE COLLISION ----------
+        
+        if show_obstacle and curs_in_obst_xmin < CursX < curs_in_obst_xmax and curs_in_obst_ymin < CursY < curs_in_obst_ymax:
+            curs_in_obst = True
             
+        # Check for state change in obstacle
+        if curs_in_obst and not curs_in_obst_prev:
+            curs_in_obst_time = pygame.time.get_ticks()
+            obst_hit_counter += 1
+            
+        if current_time - curs_in_obst_time < 100: #flash screen 50 milliseconds
+            fill_color = red
+        else:
+            fill_color = black
+                
+        
+        
+        
+
         # --------- UPDATE DISPLAY ----------    
         
         HomePos(HomeX, HomeY, HomeRad, homeColor)
@@ -434,11 +495,12 @@ def stream_data_to_csv(args, out):
         if show_obstacle:
             Obstacle()
         CursPos(CursX, CursY, CursRad, white)
+        Obst_Counter(CounterX, CounterY, font, obst_hit_counter)
         
         pygame.display.update()
         
         # ------------ SCOPE ------------
-        #print("targ_hit: " + str(targ_hit) + ", "  + "move_out: " + str(move_out) + ", " + "move_back: " + str(move_back) + ", " + "trial:" + str(trial))
+        print(clock.get_fps())
         
                 
         # ------------ SAVE DATA --------------
@@ -446,7 +508,7 @@ def stream_data_to_csv(args, out):
         dataOut = ",".join(["{}".format(round(v, 8)) for v in flat_list])
         dataOut = str(sample) + "," + dataOut + "," + str(CursX) + "," + str(CursY) + "\n"
         
-        out.write(dataOut)
+        #out.write(dataOut)
 
         sample += 1
 
@@ -489,7 +551,7 @@ def main(argv):
             stream_data_to_csv(args, f)
     else:
         stream_data_to_csv(args, sys.stdout)
-
+        
 #%% RUN THIS THANNGGGG
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
