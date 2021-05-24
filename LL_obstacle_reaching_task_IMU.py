@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+ # -*- coding: utf-8 -*-
 """
 Created on Tue Jan 26 14:01:07 2021
 @author: philc
@@ -12,6 +12,7 @@ import sys
 import pygame
 import math as m
 import numpy as np
+import Calibration
 
 from win32api import GetSystemMetrics as SysMet
 
@@ -26,6 +27,8 @@ import MotionSDK
 # Get trial conditions
 condfile = open("trial_conditions.txt", "r")
 trial_conditions = np.asarray(list(map(int, condfile.readlines())))
+examplefile = open("trial_conditions_example.txt", "r")
+example_conditions = np.asarray(list(map(int, examplefile.readlines())))
 
 #%% Initialize Screen and Set target parameters
 
@@ -55,12 +58,15 @@ ObstLength = 10
 ObstWidth = 150
 CounterX = 20
 CounterY = 20
+obst_hit_counter = 0
+theta = 0
 
 pygame.init()
 pygame.display.set_caption("Basic Reaching Task")
 # icon = pygame.image.load("imagename.png")
 # pygame.display.set_icon(icon)
 clock = pygame.time.Clock()
+font = pygame.font.SysFont("Arial", 28)
 
 font = pygame.font.SysFont("Arial", 28)
 
@@ -70,17 +76,37 @@ def Blank_Screen(color):
     screen.fill(color)  
     
 def Instructions(x = centerX, y = centerY):
-    
-    font = pygame.font.SysFont("Arial", 28)
+    screen.fill(black)
     
     text = font.render("Instructions", True, white)
-    screen.blit(text, (x - text.get_rect().width/2, y-50))
+    screen.blit(text, (x - text.get_rect().width/2, y-200))
  
-    text = font.render("...some instructions could go here....", True, white)
-    screen.blit(text, (x - text.get_rect().width/2, y+50))
+    text = font.render("Welcome to the experiment!", True, white)
+    screen.blit(text, (x - text.get_rect().width/2, y-140))
     
-    text = font.render("press space to continue", True, white)
-    screen.blit(text, (x - text.get_rect().width/2, y+100))
+    text = font.render("In this task, you will be asked to move a WHITE CURSOR from a HOME POSITION to a TARGET", True, white)
+    screen.blit(text, (x - text.get_rect().width/2, y-80))
+    
+    text = font.render("using the movement of your RIGHT LEG.  Your goal is to move the cursor STRAIGHT, FAST, and ACCURATELY", True, white)
+    screen.blit(text, (x - text.get_rect().width/2, y-50))
+    
+    text = font.render("from the home position to the target.", True, white)
+    screen.blit(text, (x - text.get_rect().width/2, y-20))
+    
+    text = font.render("Sometimes, an OBSTACLE will appear blocking the path to the target.", True, white)
+    screen.blit(text, (x - text.get_rect().width/2, y+40))
+    
+    text = font.render("When this happens, try to avoid the obstacle while still moving the cursor into the target FAST, and ACCURATELY.", True, white)
+    screen.blit(text, (x - text.get_rect().width/2, y+70))
+    
+    text = font.render('Between trials, text will appear that says "Get Ready..." and will count down "...3...2...1".', True, white)
+    screen.blit(text, (x - text.get_rect().width/2, y+130))
+    
+    text = font.render("During this time, feel free to move your leg to a comfortable neutral position in preparation for the next trial.", True, white)
+    screen.blit(text, (x - text.get_rect().width/2, y+160))
+    
+    text = font.render("Press SPACEBAR to continue....", True, white)
+    screen.blit(text, (x - text.get_rect().width/2, y+220))
     
     pygame.display.update()
 
@@ -156,7 +182,7 @@ def parse_name_map(xml_node_list):
 
     return name_map
 
-def stream_data_to_csv(args, out):
+def stream_data_to_csv(args, out, out2, theta, obst_hit_counter, conditions, block):
     client = MotionSDK.Client(args.host, args.port)
 
     #
@@ -199,20 +225,24 @@ def stream_data_to_csv(args, out):
     # Colors
     homeColor = red
     targColor = red
+    cursColor = white
     
     # Trials and Samples
     sample = 1
-    trial = 0
+    trial_sample = 1
+    trial = 1
+    trialOut = []
     
     #Timing
     curs_in_targ_time = 0
     move_start_time = 0
-    wait_in_home = 3000
+    wait_in_home = 5000
     hold_in_targ = 300
     wait_in_targ = 2000
     show_obst_pre_move = 1000
     curs_in_home_time = 0
     curs_in_obst_time = 0
+    cue_on_time = 1000000
     
     # Initial States
     curs_in_home = False
@@ -222,15 +252,17 @@ def stream_data_to_csv(args, out):
     curs_in_targ_prev = False
     targ_hit_prev = False
     move_back_prev = False
-    move_back = True
+    move_back = False
     move_out = False
     show_obstacle = False
     cue_on = False
+    cue_on_prev = False
     trial_cond = 0
     curs_in_obst = False
     curs_in_obst_prev = False
-    obst_hit_counter = 0
+    obst_hit = False
     fill_color = black
+    theta = 0
     
     curs_in_obst_xmin = centerX - (ObstWidth/2) - CursRad   
     curs_in_obst_xmax = centerX + (ObstWidth/2) + CursRad
@@ -287,8 +319,13 @@ def stream_data_to_csv(args, out):
                         "unknown data format, unabled to print header")
 
                 headerOut = ",".join(["{}".format(v) for v in flat_list])
-                headerOut = "sampleNum," + headerOut + "," + "CursorX," + "CursorY" + "\n"
+                headerOut = "sampleNum," + "trial_sample," + "block," + "trial," + "trial_cond," + headerOut + "," + "CursorX," + "CursorY," + "cue_on," + "move_out," + "move_back," + "show_obstacle," + "obst_hit" + "\n"
                 out.write(headerOut)
+                
+                # ---------- creating trialOut header here as well ----------
+                trialOut_header = ",".join(["block", "trial", "trial_cond", "trial_start_time", "cue_on_time", "move_start_time", "obst_hit", "curs_in_obst_time", "curs_in_targ_time", "trial_abort"])
+                trialOut_header = trialOut_header + "\n"
+                out2.write(trialOut_header)
                 
                 # out.write(
                 #     ",".join(["{}".format(v) for v in flat_list]))
@@ -310,6 +347,17 @@ def stream_data_to_csv(args, out):
 
         # ###################### PYGAME CODE ######################
         
+        if trial_sample == 1:
+            trial_start_time = pygame.time.get_ticks()
+            
+        sample += 1
+        trial_sample += 1
+                    
+            
+        # ---------- SET TRIAL CONDITION -----------
+        
+        trial_cond = conditions[trial-1]
+            
         
         # Get some constants for this loop
         pygame.mouse.set_visible(False)
@@ -328,11 +376,12 @@ def stream_data_to_csv(args, out):
         targ_hit_prev = targ_hit
         move_back_prev = move_back
         curs_in_obst_prev = curs_in_obst
+        cue_on_prev = cue_on
             
         
         
         
-        
+           
         # ------------ CURSOR CONTROL ----------------
 
         # Use raw gyroscope readings (degrees/sec)
@@ -340,12 +389,49 @@ def stream_data_to_csv(args, out):
         # X controlled by z gyroscope (flat_list[20])
         # Y controlled by y gyroscope (flat_list[19])
             
-        if(sample == 1):
-            CursX = HomeX
-            CursY = HomeY
+        if trial_sample < 100: # This allows participant to get home position comfortable for first 3000 ms
+            CursX_raw = HomeX
+            CursY_raw = HomeY
+            targColor = black
+            homeColor = black
+            cursColor = black
+            text = font.render("Get set...3", True, white)
+            screen.blit(text, (centerX - text.get_rect().width/2, centerY))
+        elif trial_sample < 200:
+            CursX_raw = HomeX
+            CursY_raw = HomeY
+            targColor = black
+            homeColor = black
+            cursColor = black
+            text = font.render("Get set...2", True, white)
+            screen.blit(text, (centerX - text.get_rect().width/2, centerY))
+        elif trial_sample < 300:
+            CursX_raw = HomeX
+            CursY_raw = HomeY
+            targColor = black
+            homeColor = black
+            cursColor = black
+            text = font.render("Get set...1", True, white)
+            screen.blit(text, (centerX - text.get_rect().width/2, centerY))
+        elif trial_sample == 300:
+            CursX_raw = HomeX
+            CursY_raw = HomeY
+            targColor = red
+            homeColor = red
+            cursColor = white
         else:
-            CursX -= flat_list[20]*xGain
-            CursY -= flat_list[19]*yGain
+            CursX_raw -= flat_list[20]*xGain
+            CursY_raw -= flat_list[19]*yGain
+            
+        # Perform rotation based on calibrated direction
+        CursX = CursX_raw - HomeX   # Translate to origin
+        CursY = CursY_raw - HomeY
+        
+        CursX = (CursX * m.cos(theta)) - (CursY * m.sin(theta))     # rotate with 2d rotation matrix
+        CursY = (CursX * m.sin(theta)) + (CursY * m.cos(theta))
+        
+        CursX = int(round(CursX + HomeX))   # Translate back to home position
+        CursY = int(round(CursY + HomeY))
         
         # Determine distances
         dist_to_home = m.sqrt((abs(CursX-HomeX)**2) + (abs(CursY-HomeY)**2))
@@ -380,6 +466,8 @@ def stream_data_to_csv(args, out):
         if curs_in_targ and not curs_in_targ_prev:
             curs_in_targ_time = pygame.time.get_ticks()
             
+        
+            
             
         
         # ----------- MANAGE EVENTS -------------------
@@ -394,7 +482,7 @@ def stream_data_to_csv(args, out):
         # ----------- MAIN TRIAL LOOP ------------
         
         # Participant waits in home position, after period of time, target turns green to cue movement
-        if curs_in_home and (current_time - curs_in_home_time > wait_in_home):
+        if not move_out and not move_back and curs_in_home and (current_time - trial_start_time > wait_in_home):
             cue_on = True
             targColor = green
             
@@ -404,7 +492,7 @@ def stream_data_to_csv(args, out):
             move_out = True
             
         # Participant must briefly hold in target, and signal move_out is over
-        if curs_in_targ and (current_time - curs_in_targ_time > hold_in_targ):
+        if cue_on and curs_in_targ and (current_time - curs_in_targ_time > hold_in_targ):
             #play a sound?
             targ_hit = True
             move_out = False
@@ -420,16 +508,22 @@ def stream_data_to_csv(args, out):
             targ_hit = False
             
         # If participant is once again in home position, change move_back to False
-        if curs_in_home and move_back:
-            move_back = False
+        # if curs_in_home and move_back and (current_time - curs_in_home_time > show_obst_pre_move):
+        #     move_back = False
         
-        if not move_back and move_back_prev: #if move_back switches from true to false, signalling the end of the trial, advance the trial number
-            trial += 1
+        if move_back and curs_in_home and (current_time - curs_in_home_time > wait_in_targ): #if move_back switches from true to false, signalling the end of the trial, advance the trial number
+            trial_sample = 1
             curs_in_obst = False
+            move_back = False
+            trialOut = [block, trial, trial_cond, trial_start_time, cue_on_time, move_start_time, obst_hit, curs_in_obst_time, curs_in_targ_time]
+            trialOut = ",".join(["{}".format(str(round(v, 8))) for v in trialOut])
+            trialOut = trialOut + "\n"
+            out2.write(trialOut)
+            trial += 1
+            obst_hit = False
             
-        # ---------- SET TRIAL CONDITION -----------
+            
         
-        trial_cond = trial_conditions[trial-1]
         
         
         
@@ -441,16 +535,16 @@ def stream_data_to_csv(args, out):
         
         # Present obstacle prior to movement cue
         elif trial_cond == 1:
-            if curs_in_home and (current_time - curs_in_home_time > show_obst_pre_move):
+            if trial_sample > 300 and curs_in_home and not move_back and (current_time - curs_in_home_time > show_obst_pre_move):
                 show_obstacle = True
             elif targ_hit and (current_time - curs_in_targ_time > wait_in_targ):
                 show_obstacle = False
        
         # Present obstacle with movement cue
         elif trial_cond == 2:
-            if curs_in_home and (current_time - curs_in_home_time > wait_in_home):
+            if cue_on:
                 show_obstacle = True
-            elif targ_hit and (current_time - curs_in_targ_time > wait_in_targ):
+            elif not cue_on:
                 show_obstacle = False
         
         # Present obstacle with movement onset
@@ -478,6 +572,7 @@ def stream_data_to_csv(args, out):
         if curs_in_obst and not curs_in_obst_prev:
             curs_in_obst_time = pygame.time.get_ticks()
             obst_hit_counter += 1
+            obst_hit = True
             
         if current_time - curs_in_obst_time < 100: #flash screen 50 milliseconds
             fill_color = red
@@ -494,37 +589,80 @@ def stream_data_to_csv(args, out):
         TargPos(TargX, TargY, TargRad, targColor)
         if show_obstacle:
             Obstacle()
-        CursPos(CursX, CursY, CursRad, white)
+        CursPos(CursX, CursY, CursRad, cursColor)
         Obst_Counter(CounterX, CounterY, font, obst_hit_counter)
         
         pygame.display.update()
         
         # ------------ SCOPE ------------
-        print(clock.get_fps())
+        print("Trial: " + str(trial) + "; trial_cond: " + str(trial_cond))
         
                 
+        
+        
+        # ------------- ABORT TRIAL -------------
+        if cue_on and not cue_on_prev:
+            cue_on_time = pygame.time.get_ticks()
+        
+        if current_time - cue_on_time > 10000 and cue_on == True:
+            trial_sample = 1
+            show_obstacle = False
+            cue_on = False
+            curs_in_home = False
+            move_out = False
+            trial_abort = True
+            trialOut = [block, trial, trial_cond, trial_start_time, cue_on_time, move_start_time, obst_hit, curs_in_obst_time, curs_in_targ_time, trial_abort]
+            trialOut = ",".join(["{}".format(str(round(v, 8))) for v in trialOut])
+            trialOut = trialOut + "\n"
+            out2.write(trialOut)
+            trial += 1
+            obst_hit = False
+            trial_abort = False
+        elif current_time - trial_start_time > 15000 and cue_on == False: # 15 seconds
+            trial_sample = 1
+            show_obstacle = False
+            curs_in_home = False
+            trial_abort = True
+            trialOut = [block, trial, trial_cond, trial_start_time, cue_on_time, move_start_time, obst_hit, curs_in_obst_time, curs_in_targ_time, trial_abort]
+            trialOut = ",".join(["{}".format(str(round(v, 8))) for v in trialOut])
+            trialOut = trialOut + "\n"
+            out2.write(trialOut)
+            trial += 1
+            obst_hit = False
+            trial_abort = False
+            
+            
+            
+             
         # ------------ SAVE DATA --------------
         
         dataOut = ",".join(["{}".format(round(v, 8)) for v in flat_list])
-        dataOut = str(sample) + "," + dataOut + "," + str(CursX) + "," + str(CursY) + "\n"
+        dataOut = str(sample) + "," + str(trial_sample) + "," + str(block) + "," + str(trial) + "," + str(trial_cond) + "," + dataOut + "," + str(CursX) + "," + str(CursY) + "," + str(cue_on) + "," + str(move_out) + "," + str(move_back) + "," + str(show_obstacle) + "," + str(obst_hit) + "\n"
         
-        #out.write(dataOut)
-
-        sample += 1
+        out.write(dataOut)
 
         if args.frames > 0:
             num_frames += 1
             if num_frames >= args.frames:
                 break
+            
+        if trial > len(trial_conditions):
+            break
+    
+    return obst_hit_counter, screen
 
 #%% Define input args
             
-def main(argv):
+def main(argv, theta, obst_hit_counter, conditions, block):
     parser = argparse.ArgumentParser(
         description="")
 
     parser.add_argument(
-        "--file",
+        "--datafile",
+        help="output file",
+        default="")
+    parser.add_argument(
+        "--trialfile",
         help="output file",
         default="")
     parser.add_argument(
@@ -546,12 +684,32 @@ def main(argv):
 
     args = parser.parse_args()
 
-    if args.file:
-        with open(args.file, 'w') as f:
-            stream_data_to_csv(args, f)
+    if args.datafile or args.trialfile:
+        with open(args.datafile, 'a') as f1, open(args.trialfile, "a") as f2:
+            obst_hit_counter, screen = stream_data_to_csv(args, f1, f2, theta, obst_hit_counter, conditions, block)
     else:
-        stream_data_to_csv(args, sys.stdout)
+        obst_hit_counter, screen = stream_data_to_csv(args, sys.stdout, sys.stdout, theta, obst_hit_counter, conditions, block)
+    
+    return obst_hit_counter, screen
         
 #%% RUN THIS THANNGGGG
 if __name__ == "__main__":
-    sys.exit(main(sys.argv))
+    screen, theta = Calibration.Compute_Calib_Theta()
+    obst_hit_counter, screen = main(sys.argv, theta, obst_hit_counter, conditions = example_conditions, block = 0)
+    
+    obst_hit_counter = 0
+    screen, theta = Calibration.Compute_Calib_Theta()
+    obst_hit_counter, screen = main(sys.argv, theta, obst_hit_counter, conditions = trial_conditions, block = 1)
+    
+    screen, theta = Calibration.Compute_Calib_Theta()
+    obst_hit_counter, screen = main(sys.argv, theta, obst_hit_counter, conditions = trial_conditions, block = 2)
+    
+    screen, theta = Calibration.Compute_Calib_Theta()
+    obst_hit_counter, screen = main(sys.argv, theta, obst_hit_counter, conditions = trial_conditions, block = 3)
+    
+    screen, theta = Calibration.Compute_Calib_Theta()
+    obst_hit_counter, screen = main(sys.argv, theta, obst_hit_counter, conditions = trial_conditions, block = 4)
+    
+    screen, theta = Calibration.Compute_Calib_Theta()
+    obst_hit_counter, screen = main(sys.argv, theta, obst_hit_counter, conditions = trial_conditions, block = 5)
+    
