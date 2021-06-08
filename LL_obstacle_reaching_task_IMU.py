@@ -68,8 +68,6 @@ pygame.display.set_caption("Basic Reaching Task")
 clock = pygame.time.Clock()
 font = pygame.font.SysFont("Arial", 28)
 
-font = pygame.font.SysFont("Arial", 28)
-
 #%% Define object parameters
 
 def Blank_Screen(color):
@@ -79,34 +77,40 @@ def Instructions(x = centerX, y = centerY):
     screen.fill(black)
     
     text = font.render("Instructions", True, white)
-    screen.blit(text, (x - text.get_rect().width/2, y-200))
+    screen.blit(text, (x - text.get_rect().width/2, y-300))
  
     text = font.render("Welcome to the experiment!", True, white)
-    screen.blit(text, (x - text.get_rect().width/2, y-140))
+    screen.blit(text, (x - text.get_rect().width/2, y-240))
     
     text = font.render("In this task, you will be asked to move a WHITE CURSOR from a HOME POSITION to a TARGET", True, white)
-    screen.blit(text, (x - text.get_rect().width/2, y-80))
+    screen.blit(text, (x - text.get_rect().width/2, y-180))
     
     text = font.render("using the movement of your RIGHT LEG.  Your goal is to move the cursor STRAIGHT, FAST, and ACCURATELY", True, white)
-    screen.blit(text, (x - text.get_rect().width/2, y-50))
+    screen.blit(text, (x - text.get_rect().width/2, y-150))
     
     text = font.render("from the home position to the target.", True, white)
-    screen.blit(text, (x - text.get_rect().width/2, y-20))
+    screen.blit(text, (x - text.get_rect().width/2, y-120))
+    
+    text = font.render("For each trial, your cue to move will be when the TARGET turns", True, white)
+    screen.blit(text, (x - text.get_rect().width/2, y-60))
+    
+    text = font.render("LIGHT BLUE", True, green)
+    screen.blit(text, (x - text.get_rect().width/2, y-30))
     
     text = font.render("Sometimes, an OBSTACLE will appear blocking the path to the target.", True, white)
-    screen.blit(text, (x - text.get_rect().width/2, y+40))
+    screen.blit(text, (x - text.get_rect().width/2, y+30))
     
     text = font.render("When this happens, try to avoid the obstacle while still moving the cursor into the target FAST, and ACCURATELY.", True, white)
-    screen.blit(text, (x - text.get_rect().width/2, y+70))
+    screen.blit(text, (x - text.get_rect().width/2, y+60))
     
     text = font.render('Between trials, text will appear that says "Get Ready..." and will count down "...3...2...1".', True, white)
-    screen.blit(text, (x - text.get_rect().width/2, y+130))
+    screen.blit(text, (x - text.get_rect().width/2, y+120))
     
     text = font.render("During this time, feel free to move your leg to a comfortable neutral position in preparation for the next trial.", True, white)
-    screen.blit(text, (x - text.get_rect().width/2, y+160))
+    screen.blit(text, (x - text.get_rect().width/2, y+150))
     
     text = font.render("Press SPACEBAR to continue....", True, white)
-    screen.blit(text, (x - text.get_rect().width/2, y+220))
+    screen.blit(text, (x - text.get_rect().width/2, y+210))
     
     pygame.display.update()
 
@@ -137,37 +141,7 @@ def Obst_Counter(x, y, font, obstacles_hit):
     screen.blit(text, (x, y))
     
 
-#%% INSTRUCTIONS
-run = True
-finished_Instructions = False
-
-#Instructions
-while run:
-    
-    # persistent parameters should stay in while loop
-        
-    # --------- GET EVENTS ---------- 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit("User quit game")
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                finished_Instructions = True
-    
-    
-    # --------- INSTRUCTIONS -----------
-    
-    # first, show some instructions
-    Instructions()
-        
-    if finished_Instructions:
-        Blank_Screen(black)
-        pygame.display.update() 
-        pygame.time.wait(2000)
-        run = False
-    
-  
+ 
 #%% IMU Control
 
 def parse_name_map(xml_node_list):
@@ -182,7 +156,40 @@ def parse_name_map(xml_node_list):
 
     return name_map
 
+#%% THE BUSINESS
 def stream_data_to_csv(args, out, out2, theta, obst_hit_counter, conditions, block):
+    
+    # INSTRUCTIONS
+    run = True
+    finished_Instructions = False
+    
+    #Instructions
+    while run:
+        
+        # persistent parameters should stay in while loop
+            
+        # --------- GET EVENTS ---------- 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit("User quit game")
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    finished_Instructions = True
+        
+        
+        # --------- INSTRUCTIONS -----------
+        
+        # first, show some instructions
+        Instructions()
+            
+        if finished_Instructions:
+            Blank_Screen(black)
+            pygame.display.update() 
+            pygame.time.wait(2000)
+            run = False
+    
+    
     client = MotionSDK.Client(args.host, args.port)
 
     #
@@ -262,7 +269,7 @@ def stream_data_to_csv(args, out, out2, theta, obst_hit_counter, conditions, blo
     curs_in_obst_prev = False
     obst_hit = False
     fill_color = black
-    theta = 0
+    #theta = 0
     
     curs_in_obst_xmin = centerX - (ObstWidth/2) - CursRad   
     curs_in_obst_xmax = centerX + (ObstWidth/2) + CursRad
@@ -320,12 +327,14 @@ def stream_data_to_csv(args, out, out2, theta, obst_hit_counter, conditions, blo
 
                 headerOut = ",".join(["{}".format(v) for v in flat_list])
                 headerOut = "sampleNum," + "trial_sample," + "block," + "trial," + "trial_cond," + headerOut + "," + "CursorX," + "CursorY," + "cue_on," + "move_out," + "move_back," + "show_obstacle," + "obst_hit" + "\n"
-                out.write(headerOut)
+                if block == 0:
+                    out.write(headerOut)
                 
                 # ---------- creating trialOut header here as well ----------
                 trialOut_header = ",".join(["block", "trial", "trial_cond", "trial_start_time", "cue_on_time", "move_start_time", "obst_hit", "curs_in_obst_time", "curs_in_targ_time", "trial_abort"])
                 trialOut_header = trialOut_header + "\n"
-                out2.write(trialOut_header)
+                if block == 0:
+                    out2.write(trialOut_header)
                 
                 # out.write(
                 #     ",".join(["{}".format(v) for v in flat_list]))
@@ -356,6 +365,8 @@ def stream_data_to_csv(args, out, out2, theta, obst_hit_counter, conditions, blo
             
         # ---------- SET TRIAL CONDITION -----------
         
+        # if trial == len(conditions)+1:
+        #     break
         trial_cond = conditions[trial-1]
             
         
@@ -463,7 +474,7 @@ def stream_data_to_csv(args, out, out2, theta, obst_hit_counter, conditions, blo
         if not curs_in_home and curs_in_home_prev:
             move_start_time = pygame.time.get_ticks()
             
-        if curs_in_targ and not curs_in_targ_prev:
+        if cue_on and curs_in_targ and not curs_in_targ_prev:
             curs_in_targ_time = pygame.time.get_ticks()
             
         
@@ -482,7 +493,7 @@ def stream_data_to_csv(args, out, out2, theta, obst_hit_counter, conditions, blo
         # ----------- MAIN TRIAL LOOP ------------
         
         # Participant waits in home position, after period of time, target turns green to cue movement
-        if not move_out and not move_back and curs_in_home and (current_time - trial_start_time > wait_in_home):
+        if not move_out and not move_back and curs_in_home and (current_time - trial_start_time > wait_in_home) and (current_time - curs_in_home_time > wait_in_home):
             cue_on = True
             targColor = green
             
@@ -554,9 +565,9 @@ def stream_data_to_csv(args, out, out2, theta, obst_hit_counter, conditions, blo
             elif targ_hit and (current_time - curs_in_targ_time > wait_in_targ):
                 show_obstacle = False
                 
-        # Present obstacle when cursor is 1/3 of the way through the movement
+        # Present obstacle when cursor is 20% of the way through the movement
         elif trial_cond == 4:
-            if move_out and not move_back and CursY < (HomeY - (round((HomeY - TargY)/3))):
+            if move_out and not move_back and CursY < (HomeY - (round((HomeY - TargY)/5))):
                 show_obstacle = True
             elif targ_hit and (current_time - curs_in_targ_time > wait_in_targ):
                 show_obstacle = False    
@@ -565,16 +576,16 @@ def stream_data_to_csv(args, out, out2, theta, obst_hit_counter, conditions, blo
                 
         # --------- MANAGE OBSTACLE COLLISION ----------
         
-        if show_obstacle and curs_in_obst_xmin < CursX < curs_in_obst_xmax and curs_in_obst_ymin < CursY < curs_in_obst_ymax:
+        if cue_on and show_obstacle and curs_in_obst_xmin < CursX < curs_in_obst_xmax and curs_in_obst_ymin < CursY < curs_in_obst_ymax:
             curs_in_obst = True
             
         # Check for state change in obstacle
-        if curs_in_obst and not curs_in_obst_prev:
+        if curs_in_obst and not curs_in_obst_prev and cue_on:
             curs_in_obst_time = pygame.time.get_ticks()
             obst_hit_counter += 1
             obst_hit = True
             
-        if current_time - curs_in_obst_time < 100: #flash screen 50 milliseconds
+        if current_time - curs_in_obst_time < 100: #flash screen 100 milliseconds
             fill_color = red
         else:
             fill_color = black
@@ -595,7 +606,7 @@ def stream_data_to_csv(args, out, out2, theta, obst_hit_counter, conditions, blo
         pygame.display.update()
         
         # ------------ SCOPE ------------
-        print("Trial: " + str(trial) + "; trial_cond: " + str(trial_cond))
+        print("Trial: " + str(trial) + "; trial_cond: " + str(trial_cond) + "; move_back: " + str(move_back) + "; current_time - trial_start_time: " + str(current_time - trial_start_time))
         
                 
         
@@ -604,12 +615,14 @@ def stream_data_to_csv(args, out, out2, theta, obst_hit_counter, conditions, blo
         if cue_on and not cue_on_prev:
             cue_on_time = pygame.time.get_ticks()
         
-        if current_time - cue_on_time > 10000 and cue_on == True:
+        if current_time - cue_on_time > 15000 and cue_on:
             trial_sample = 1
             show_obstacle = False
             cue_on = False
             curs_in_home = False
             move_out = False
+            targ_hit = False
+            move_back = False
             trial_abort = True
             trialOut = [block, trial, trial_cond, trial_start_time, cue_on_time, move_start_time, obst_hit, curs_in_obst_time, curs_in_targ_time, trial_abort]
             trialOut = ",".join(["{}".format(str(round(v, 8))) for v in trialOut])
@@ -618,11 +631,13 @@ def stream_data_to_csv(args, out, out2, theta, obst_hit_counter, conditions, blo
             trial += 1
             obst_hit = False
             trial_abort = False
-        elif current_time - trial_start_time > 15000 and cue_on == False: # 15 seconds
+        elif current_time - trial_start_time > 20000 and not cue_on: # 15 seconds
             trial_sample = 1
             show_obstacle = False
             curs_in_home = False
             trial_abort = True
+            targ_hit = False
+            move_back = False
             trialOut = [block, trial, trial_cond, trial_start_time, cue_on_time, move_start_time, obst_hit, curs_in_obst_time, curs_in_targ_time, trial_abort]
             trialOut = ",".join(["{}".format(str(round(v, 8))) for v in trialOut])
             trialOut = trialOut + "\n"
@@ -646,7 +661,7 @@ def stream_data_to_csv(args, out, out2, theta, obst_hit_counter, conditions, blo
             if num_frames >= args.frames:
                 break
             
-        if trial > len(trial_conditions):
+        if trial == len(conditions)+1:
             break
     
     return obst_hit_counter, screen
@@ -713,3 +728,4 @@ if __name__ == "__main__":
     screen, theta = Calibration.Compute_Calib_Theta()
     obst_hit_counter, screen = main(sys.argv, theta, obst_hit_counter, conditions = trial_conditions, block = 5)
     
+    pygame.quit()
