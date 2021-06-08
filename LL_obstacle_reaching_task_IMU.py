@@ -73,13 +73,16 @@ font = pygame.font.SysFont("Arial", 28)
 def Blank_Screen(color):
     screen.fill(color)  
     
-def Instructions(x = centerX, y = centerY):
+def Instructions(block, x = centerX, y = centerY):
     screen.fill(black)
     
     text = font.render("Instructions", True, white)
     screen.blit(text, (x - text.get_rect().width/2, y-300))
- 
-    text = font.render("Welcome to the experiment!", True, white)
+    
+    if block == 0:
+        text = font.render("Welcome to the experiment!", True, white)
+    else:
+        text = font.render("Block " + str(block), True, white)
     screen.blit(text, (x - text.get_rect().width/2, y-240))
     
     text = font.render("In this task, you will be asked to move a WHITE CURSOR from a HOME POSITION to a TARGET", True, white)
@@ -181,7 +184,7 @@ def stream_data_to_csv(args, out, out2, theta, obst_hit_counter, conditions, blo
         # --------- INSTRUCTIONS -----------
         
         # first, show some instructions
-        Instructions()
+        Instructions(block)
             
         if finished_Instructions:
             Blank_Screen(black)
