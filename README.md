@@ -78,8 +78,9 @@ MotionNode IMUs need to be applied to the participant in a specific way for this
 
 ## Running the task
 
-1) Open Anaconda Powershell Prompt.  This should be located with the Ananconda installation in the Start Menu or Apps menu, or you can search this on the computer and it should come right up.
-2) Change the directory to the place where *LL_obstacle_avoidance_task_IMU.py* is stored on the computer.  For Laptop Z, these should be in a folder called *LL_obstacle_avoidance_task_IMU-main* which itself is in the *Documents* folder.  To change the directory, use the "cd" command, followed by the directory of the folder in quotes.  For example:
+1) Seat the participant with the IMUs on in front of the computer.  Make sure the participant can comfortably flex and extend their legs.
+2) Open Anaconda Powershell Prompt.  This should be located with the Ananconda installation in the Start Menu or Apps menu, or you can search this on the computer and it should come right up.
+3) Change the directory to the place where *LL_obstacle_avoidance_task_IMU.py* is stored on the computer.  For Laptop Z, these should be in a folder called *LL_obstacle_avoidance_task_IMU-main* which itself is in the *Documents* folder.  To change the directory, use the "cd" command, followed by the directory of the folder in quotes.  For example:
 
      cd "C:\Users\philc\Documents\LL_obstacle_avoidance_task_IMU-main"
      
@@ -89,4 +90,27 @@ MotionNode IMUs need to be applied to the participant in a specific way for this
      
      The text "mydatafile.txt" and "mytrialfile.txt" are where the data are saved.  These can be replaced by another valid filename (i.e., subject number, etc.).  More on output below.
      
+<br>
 
+## Task Structure
+
+The task consists of several blocks, in this order:
+
+1) Calibration Block: During this period, the participant makes repetitive knee flexion-extension movements for about 10 seconds.  These movements are used to account for variability in the IMU placement on the leg, and determine the participant's subjective "straight ahead" leg movements.  Participants should be verbally encouraged to move their leg in a straight forward and back manner.  These movements don't need to be overly fast, but should be nice and smooth.
+2) Practice block: 16 trials which allow the participant to understand the tasks.  The obstacle appears every other trial, and the obstacle trials cycle through the 4 obstacle conditions twice.
+3) Calibration Block
+4) Experimental Block 1: 40 trials.  Trials are pseudorandomly presented across the 5 conditions.  Consists of 20 non-obstacle trials and 5 trials of each obstacle condition.  Subsequent Experimental blocks follow this structure.
+5) Calibration Block
+6) Experimental Block 2
+7) Calibration Block
+8) Experimental Block 3
+9) Calibration Block
+10) Experimental Block 4
+11) Calibration Block
+12) Experimental Block 5
+
+Instructions are presented to the participant prior to the Practice Block and each Experimental Block.  Each Instruction page can also serve as a break period.
+
+<br>
+
+## Understanding the output
