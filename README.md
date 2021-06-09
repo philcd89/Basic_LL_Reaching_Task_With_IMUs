@@ -118,12 +118,14 @@ Instructions are presented to the participant prior to the Practice Block and ea
 
 This task puts its output in two files, which you named when you ran the code (in this README, they are "mydatafile.txt" and "mytrialfile.txt").  **WARNING: when generating the output, the code looks to see whether the file exists in the current directory; if the file doesn't exist, it creates it.  If the file already exists, it appends the data onto the file.  Thus, to avoid appending data from one task run onto a prior task run, make sure that the file names change from one run to the next, or move the created files out of the directory between runs.**  Commas delimit columns.
 
+### The Datafile
+
 The datafile, or "mydatafile.txt", captures the data on a sample by sample basis.  Variables included in this output are:
 
 1) sampleNum: this is the sample number which counts up from the start of the experiment
 2) trial_sample: this sample number counts up from the start of an individual trial
 3) block: the block number in the task (0 = Practice, 1-5 refer to the experimental blocks)
-4) trial: the trial number
+4) trial: the trial number within a block
 5) trial_cond: the trial condition
 6) Bus.gx through Node05.rz: gyroscope (g) and rotation (r) data in each dimension (x, y, z) for each IMU.
 7) CursorX: The x location of the cursor in pixels
@@ -140,8 +142,19 @@ A note about the cursor location - it's a little weird.  The coordinate system o
 
 Importantly, the first trial_sample of each trial will ALWAYS have the cursor in the center of the home position, and these can be considered the origin.  To convert to a normal cartesian coordinate system, subtract this X and Y from the X and Y location of the cursor in every sample, and then invert the Y axis.  I know it's a pain, sorry.
 
+### The Trialfile
 
+The trialfile, or "mytrialfile.txt", captures the data on a trial by trial basis.  Variables included in this output are:
 
-
+1) block: The block of the experiment (0 = Practice, 1-5 are the Experimental Blocks)
+2) trial: The trial number within a block
+3) trial_cond: The trial condition
+4) trial_start_time: The time since the beginning of the experiment in milliseconds when the trial started.
+5) cue_on_time: The time since the beginning of the experiment in milliseconds when the cue turned on for a given trial since
+6) move_start_time: The time since the beginning of the experiment in milliseconds when the participant first began to move
+7) obst_hit: a boolean value indicating whether the participant contacted the obstacle during the trial (0 = successful avoidance, 1 = hit)
+8) curs_in_obst_time: The time since the beginning of the experiment in milliseconds when the participant hit the obstacle.  If obst_hit is 0, this number is meaningless (interited from the last time the obstacle was hit).
+9) curs_in_targ_time: The time since the beginning of the experiment in milliseconds when the participant hits the target.
+10) trial_abort: If the participant does not complete the trial within 20 seconds, the trial aborts and the experiment moves on to the next trial; all data for these lines are invalid (1 = trial aborted, NA = trial not aborted).
 
 
