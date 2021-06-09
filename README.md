@@ -120,7 +120,7 @@ This task puts its output in two files, which you named when you ran the code (i
 
 ### The Datafile
 
-The datafile, or "mydatafile.txt", captures the data on a sample by sample basis.  Variables included in this output are:
+The datafile, or "mydatafile.txt", captures the data on a sample by sample basis (i.e., each row is 1 sample).  Variables included in this output are:
 
 1) sampleNum: this is the sample number which counts up from the start of the experiment
 2) trial_sample: this sample number counts up from the start of an individual trial
@@ -144,7 +144,7 @@ Importantly, the first trial_sample of each trial will ALWAYS have the cursor in
 
 ### The Trialfile
 
-The trialfile, or "mytrialfile.txt", captures the data on a trial by trial basis.  Variables included in this output are:
+The trialfile, or "mytrialfile.txt", captures the data on a trial by trial basis (i.e., row is one trial).  Variables included in this output are:
 
 1) block: The block of the experiment (0 = Practice, 1-5 are the Experimental Blocks)
 2) trial: The trial number within a block
@@ -156,5 +156,15 @@ The trialfile, or "mytrialfile.txt", captures the data on a trial by trial basis
 8) curs_in_obst_time: The time since the beginning of the experiment in milliseconds when the participant hit the obstacle.  If obst_hit is 0, this number is meaningless (interited from the last time the obstacle was hit).
 9) curs_in_targ_time: The time since the beginning of the experiment in milliseconds when the participant hits the target.
 10) trial_abort: If the participant does not complete the trial within 20 seconds, the trial aborts and the experiment moves on to the next trial; all data for these lines are invalid (1 = trial aborted, NA = trial not aborted).
+
+<br>
+
+## Contributing and Sharing
+
+Feel free to contribute, share, and post issues.
+
+<br>
+
+# HAPPY EXPERIMENTING
 
 
