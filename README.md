@@ -84,11 +84,11 @@ MotionNode IMUs need to be applied to the participant in a specific way for this
 2) Open Anaconda Powershell Prompt.  This should be located with the Ananconda installation in the Start Menu or Apps menu, or you can search this on the computer and it should come right up.
 3) Change the directory to the place where *LL_obstacle_avoidance_task_IMU.py* is stored on the computer.  For Laptop Z, these should be in a folder called *LL_obstacle_avoidance_task_IMU-main* which itself is in the *Documents* folder.  To change the directory, use the "cd" command, followed by the directory of the folder in quotes.  For example:
 
-     cd "C:\Users\philc\Documents\LL_obstacle_avoidance_task_IMU-main"
+     `cd "C:\Users\philc\Documents\LL_obstacle_avoidance_task_IMU-main"`
      
 3) To run the task, type the following:
 
-     LL_obstacle_avoidance_task_IMU.py --header --datafile="mydatafile.txt" --trialfile="mytrialfile.txt"
+     `LL_obstacle_avoidance_task_IMU.py --header --datafile="mydatafile.txt" --trialfile="mytrialfile.txt"`
      
      The text "mydatafile.txt" and "mytrialfile.txt" are where the data are saved.  These can be replaced by another valid filename (i.e., subject number, etc.).  More on output below.
      
