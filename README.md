@@ -47,6 +47,7 @@ This task also uses Pygame, a python module used to design and run simple comput
 
 This task needs to be downloaded from github to use.  You can download it as a zipped folder, or [clone](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository-from-github/cloning-a-repository) this repository to your computer.  While the task can also be stored on the lab drive, DO NOT run the task from the drive - run the task from a local location.  If you run the task from the lab drive, the task will lag because the task needs to read/write over an internet connection.
 
+<br>
 
 ## Applying the IMUs
 
