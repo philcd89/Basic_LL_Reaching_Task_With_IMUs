@@ -8,7 +8,7 @@ This is a motor control task in which participants make lower limb movements (e.
 
 ## Files in this repository
 
-* *README.md*: You're looking at it!  This file provides info about the task, the files in this repository, 
+* *README.md*: You're looking at it!  This file provides info about the task, the files in this repository, and other info.
 * *LL_obstacle_avoidance_task_IMU.py*: This is the main file that runs the task
 * *MotionSDK.py*: This file is made by MotionNode and supplies functions used to read data from the IMUs
 * *Calibration.py*: This file is used to account variation in the placement of the IMU on the participants leg, and also to account for the participant's subjective "straight ahead" knee flexion/extension.
@@ -39,7 +39,7 @@ This task is run via python.  The best way to download python is to get the most
 
 This task also uses Pygame, a python module used to design and run simple computer games.  To download pygame:
 1) Open anaconda prompt
-2) type *pip install pygame*, and hit Enter.
+2) type `pip install pygame`, and hit Enter.
 
 <br>
 
