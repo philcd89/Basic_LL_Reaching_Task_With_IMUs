@@ -73,6 +73,7 @@ MotionNode IMUs need to be applied to the participant in a specific way for this
 6) When "Bus" appears, click "Bus".  MotionNode should now be connected to the IMU system.
 7) Click "Help".  Click "Calibrate".  With IMUs motionless, click "Start".  Wait until the calibration is complete.
 8) Click "Node Viewer".  Hover over the "+" button in the bottom right of the screen.  Hit the ">" button to connect to the IMUs.  Select a node (an IMU). The animation should now follow the motion of the IMU.
+9) Make sure the IMUs sample at 100 Hz
 
 <br>
 
@@ -114,3 +115,33 @@ Instructions are presented to the participant prior to the Practice Block and ea
 <br>
 
 ## Understanding the output
+
+This task puts its output in two files, which you named when you ran the code (in this README, they are "mydatafile.txt" and "mytrialfile.txt").  **WARNING: when generating the output, the code looks to see whether the file exists in the current directory; if the file doesn't exist, it creates it.  If the file already exists, it appends the data onto the file.  Thus, to avoid appending data from one task run onto a prior task run, make sure that the file names change from one run to the next, or move the created files out of the directory between runs.**  Commas delimit columns.
+
+The datafile, or "mydatafile.txt", captures the data on a sample by sample basis.  Variables included in this output are:
+
+1) sampleNum: this is the sample number which counts up from the start of the experiment
+2) trial_sample: this sample number counts up from the start of an individual trial
+3) block: the block number in the task (0 = Practice, 1-5 refer to the experimental blocks)
+4) trial: the trial number
+5) trial_cond: the trial condition
+6) Bus.gx through Node05.rz: gyroscope (g) and rotation (r) data in each dimension (x, y, z) for each IMU.
+7) CursorX: The x location of the cursor in pixels
+8) CursorY: The y location of the cursor in pixels
+9) cue_on: a logical value indicating whether the cue has turned on
+10) move_out: a logical value indicating that the participant is moving from the home posiiton to the target
+11) move_back: a logical value indicating that the participant is moving from the target to the home position
+12) show_obstacle: a logical value indicating whether the obstacle is present on the screen
+13) obst_hit: a logical value indicating whether the cursor contacted the obstacle
+
+A note about the cursor location - it's a little weird.  The coordinate system origin for pygame is located in the upper left corner of the window.  Thus, increasing X numbers mean the cursor is moving *rightwards* on the screen.  Increasing Y numbers unintuitavely mean the cursor is moving *downwards* on the screen (see picture below; the red box indicates a given screen).  So, a little math will have to be done in post-processing to change these coordinates to a normal cartesian coordinate frame (this is something I'd look to fix in updates of this task).
+
+<img src="https://humberto.io/img/exploring-pygame/drawing-axis.jpg" width="400" height="300">
+
+Importantly, the first trial_sample of each trial will ALWAYS have the cursor in the center of the home position, and these can be considered the origin.  To convert to a normal cartesian coordinate system, subtract this X and Y from the X and Y location of the cursor in every sample, and then invert the Y axis.  I know it's a pain, sorry.
+
+
+
+
+
+
