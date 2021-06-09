@@ -1,6 +1,6 @@
 # Lower Limb Obstacle Avoidance Task With IMUs
 
-This is a lower limb reaching task in which participants make lower limb movements (e.g., knee flexion/extension) while Inertial Measurement Units (IMUs) control a cursor on a screen and move it between two points.  Obstacles sometimes appear, and the participant is asked to avoid the obstacle.  This code uses [MotionNode](https://www.motionnode.com/) sensors and borrows heavily from their SDK.  Note: This task was my first time using Python, so don't judge my janky code too much.
+This is a lower limb reaching task in which participants make lower limb movements (e.g., knee flexion/extension) while Inertial Measurement Units (IMUs) control a cursor on a screen and move it between two points.  Obstacles sometimes appear, and the participant is asked to avoid the obstacle.  This code uses [MotionNode](https://www.motionnode.com/) sensors and borrows heavily from their SDK.  This task was created by Phil Desrochers for the Motor Development Lab at Boston University.  Note: This task was my first time using Python, so don't judge my janky code too much.
 
 **PURPOSE:** The purpose of this task is to investigate how participants are able to make adjustments to online movements of their lower limbs as task constraints change.
 
@@ -166,6 +166,14 @@ Feel free to contribute, share, and post issues.
 
 <br>
 
-# HAPPY EXPERIMENTING
+## To-do list
+
+* Modify cursor position output
+* Modify timing output so it's relative to the trial start instead of the experiment start
+* Add code for use with left leg.
+
+<br><br>
+
+**HAPPY EXPERIMENTING**
 
 
