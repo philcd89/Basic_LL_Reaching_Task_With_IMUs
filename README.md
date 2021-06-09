@@ -43,15 +43,23 @@ This task also uses Pygame, a python module used to design and run simple comput
 
 <br>
 
+## Downloading this task from GitHub
+
+This task needs to be downloaded from github to use.  You can download it as a zipped folder, or [clone](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository-from-github/cloning-a-repository) this repository to your computer.  While the task can also be stored on the lab drive, DO NOT run the task from the drive - run the task from a local location.  If you run the task from the lab drive, the task will lag because the task needs to read/write over an internet connection.
+
+
 ## Applying the IMUs
 
 MotionNode IMUs need to be applied to the participant in a specific way for this task:
 
 1) Place velcro straps on participant thighs and shanks.  Longer straps are for the thighs, shorter straps for the shanks.  Straps should be tight, but not overly so.  Thigh straps should be placed approximately 1/2 way between the lateral epicondyle of the femur (outer knee) and great trochanter of femur (outer hip).  Shank straps should placed approximately 1/2 way between the lateral epicondyle of the femur and the lateral malleolus of ankle.  Make sure that the velcro part of the strap is not on the outside of the leg, as that is where the IMU will be placed.  **TIP:** It is best if participants are asked to wear shorts or athletic clothes for the experiment. 
+     
      <img src="https://user-images.githubusercontent.com/48997660/121388792-c5831680-c919-11eb-84fd-ba450e054f99.JPG" width="150" height="200">
+
 2) Don the IMU belt, positioning the waist IMU in the center of the back, at approximately the L4 vertebra.  
 3) **WARNING: THIS STEP IS CRITICAL.** The IMUs are labeled according to their segments.  They should be placed on the **OUTSIDE** of the leg on their respective segments, **WIRES UP**.  This is particularly important for the shank IMUs, which are the IMUs drive the task.  Do your best to place the IMUs such that they'll move in the sagittal plane. Note: I like to wiggle the IMUs into the velcro to make sure the velcro digs in well.  You can also wrap the IMUs in athletic prewrap to keep them secure.  Wire slack can be taken in with clips.
-    <img src="https://user-images.githubusercontent.com/48997660/121392287-3d9f0b80-c91d-11eb-8a10-8208068bfb63.JPG" width="150" height="200">
+
+     <img src="https://user-images.githubusercontent.com/48997660/121392287-3d9f0b80-c91d-11eb-8a10-8208068bfb63.JPG" width="150" height="200">
 
 <br>
 
@@ -71,4 +79,14 @@ MotionNode IMUs need to be applied to the participant in a specific way for this
 ## Running the task
 
 1) Open Anaconda Powershell Prompt.  This should be located with the Ananconda installation in the Start Menu or Apps menu, or you can search this on the computer and it should come right up.
-2) Change the directory to the place where *LL_obstacle_avoidance_task_IMU.py* is stored on the computer.  For Laptop Z, these should be in the documents
+2) Change the directory to the place where *LL_obstacle_avoidance_task_IMU.py* is stored on the computer.  For Laptop Z, these should be in a folder called *LL_obstacle_avoidance_task_IMU-main* which itself is in the *Documents* folder.  To change the directory, use the "cd" command, followed by the directory of the folder in quotes.  For example:
+
+     cd "C:\Users\philc\Documents\LL_obstacle_avoidance_task_IMU-main"
+     
+3) To run the task, type the following:
+
+     LL_obstacle_avoidance_task_IMU.py --header --datafile="mydatafile.txt" --trialfile="mytrialfile.txt"
+     
+     The text "mydatafile.txt" and "mytrialfile.txt" are where the data are saved.  These can be replaced by another valid filename (i.e., subject number, etc.).  More on output below.
+     
+
