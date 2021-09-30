@@ -88,7 +88,7 @@ MotionNode IMUs need to be applied to the participant in a specific way for this
      
 3) To run the task, type the following:
 
-     `LL_obstacle_avoidance_task_IMU.py --header --datafile="mydatafile.txt" --trialfile="mytrialfile.txt"`
+     `python LL_obstacle_avoidance_task_IMU.py --header --datafile="mydatafile.txt" --trialfile="mytrialfile.txt"`
      
      The text "mydatafile.txt" and "mytrialfile.txt" are where the data are saved.  These can be replaced by another valid filename (i.e., subject number, etc.).  More on output below.
      
