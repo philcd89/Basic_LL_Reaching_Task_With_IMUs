@@ -139,7 +139,7 @@ The datafile, or "mydatafile.txt", captures the data on a sample by sample basis
 
 A note about the cursor location - it's a little weird.  The coordinate system origin for pygame is located in the upper left corner of the window.  Thus, increasing X numbers mean the cursor is moving *rightwards* on the screen.  Increasing Y numbers unintuitavely mean the cursor is moving *downwards* on the screen (see picture below; the red box indicates a given screen).  So, a little math will have to be done in post-processing to change these coordinates to a normal cartesian coordinate frame (this is something I'd look to fix in updates of this task).
 
-<img src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fhumberto.io%2Fblog%2Fexploring-pygame-2-drawing-on-screen%2F&psig=AOvVaw0hyMi7JZviP3Zv1MIGXfMH&ust=1636161684756000&source=images&cd=vfe&ved=0CAsQjRxqFwoTCOCSsbSHgPQCFQAAAAAdAAAAABAD" width="400" height="300">
+<img src="https://humberto.io/blog/exploring-pygame-2-drawing-on-screen/assets/drawing-axis.jpg" width="400" height="300">
 
 Importantly, the first trial_sample of each trial will ALWAYS have the cursor in the center of the home position, and these can be considered the origin.  To convert to a normal cartesian coordinate system, subtract this X and Y from the X and Y location of the cursor in every sample, and then invert the Y axis.  I know it's a pain, sorry.
 
