@@ -301,7 +301,8 @@ def stream_data_to_csv(args, out, out2, theta, obst_hit_counter, conditions, blo
             if args.header:
                 ChannelName = [
                     "gx", "gy", "gz",
-                    "rx", "ry", "rz"
+                    "rx", "ry", "rz",
+                    "ax", "ay", "az"
                 ]
 
                 name_map = parse_name_map(xml_node_list)
@@ -434,8 +435,8 @@ def stream_data_to_csv(args, out, out2, theta, obst_hit_counter, conditions, blo
             homeColor = red
             cursColor = white
         else:
-            CursX_raw -= flat_list[20]*xGain
-            CursY_raw -= flat_list[19]*yGain
+            CursX_raw -= flat_list[29]*xGain
+            CursY_raw -= flat_list[28]*yGain
             
         # Perform rotation based on calibrated direction
         CursX = CursX_raw - HomeX   # Translate to origin
