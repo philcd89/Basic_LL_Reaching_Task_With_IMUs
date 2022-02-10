@@ -213,6 +213,7 @@ def stream_data_to_csv(args, out, out2, theta, obst_hit_counter, conditions, blo
         "<configurable inactive=\"1\">" \
         "<g/>" \
         "<r/>" \
+        "<a/>" \
         "</configurable>"
 
     if not client.writeData(xml_string):
